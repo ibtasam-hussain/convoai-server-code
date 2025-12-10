@@ -1,0 +1,174 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: var(--font-poppins), sans-serif;
+  --sidebar-w: 288px;
+}
+/* globals.css */
+.app-shell { padding-left: var(--sidebar-w); }
+
+/* globals.css */
+.no-app-padding { padding-left: 0 !important; }
+
+
+body {
+  font-family: var(--font-poppins), sans-serif;
+}
+
+.button, button {
+  cursor: pointer;
+  user-select: none; 
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+button img {
+  pointer-events: auto !important;
+  opacity: 1 !important;
+  
+  user-select: none; 
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+
+/* gradient text */
+.gradient-text {
+  background: radial-gradient(70.71% 70.71% at 50% 50%, #FFF 30%, rgba(255, 255, 255, 0.50) 84.77%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus,
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #1a1a1a !important; /* make visible */
+  caret-color: #1a1a1a !important;
+}
+
+
+/* input[data-autocompleted], input:-webkit-autofill::first-line, input:-internal-autofill-selected, input {
+  font-family: var(--font-poppins), sans-serif !important;
+  font-size: inherit !important;
+} */
+
+/* HTML: <div class="loader"></div> */
+.loader {
+  width: 40px;
+  height: 40px;
+  --c:no-repeat linear-gradient(white 0 0);
+  background: var(--c),var(--c),var(--c),var(--c);
+  background-size: 21px 21px;
+  animation: l5 1.5s infinite cubic-bezier(0.3,1,0,1);
+}
+@keyframes l5 {
+ 0%   {background-position: 0    0,100% 0   ,100% 100%,0 100%}
+ 33%  {background-position: 0    0,100% 0   ,100% 100%,0 100%;width:60px;height: 60px}
+ 66%  {background-position: 100% 0,100% 100%,0    100%,0 0   ;width:60px;height: 60px}
+ 100% {background-position: 100% 0,100% 100%,0    100%,0 0   }
+}
+
+.loader-small {
+  border: 5px solid #f3f3f3; /* Light grey */
+  border-top: 5px solid #3498db; /* Blue */
+  border-radius: 50%;
+  width: 30px;
+  height: 30x;
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+
+/* custom: scrollbar */
+/* .custom-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #888 #f1f1f1;
+} */
+
+/* WebKit scrollbar properties */
+.custom-scroll::-webkit-scrollbar {
+  width: 7px;
+}
+.custom-scroll::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.2);
+}
+.custom-scroll::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 15px;
+  /* border: 3px solid #ccc; */
+}
+.custom-scroll::-webkit-scrollbar-thumb:hover {
+  background: #666;
+}
+
+
+/* custom: select */
+.select-wrapper select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+/* .select-wrapper select option:checked, .select-wrapper select option:hover {
+  background-color: #e0e0e0;
+  color: #000;
+} */
+.select-wrapper::after {
+  content: '\25BC';
+  position: absolute;
+  top: 50%;
+  right: 15px;
+  transform: translateY(-50%);
+  pointer-events: none;
+  font-size: 12px;
+  color: #666;
+}
+
+
+/* ===== Custom AntD Step Colors ===== */
+
+/* Step circle (default state) */
+.ant-steps-item-icon {
+  background-color: #2A155A !important;   /* circle bg */
+  border-color: #2A155A !important;       /* circle border */
+}
+
+/* Step circle number color */
+.ant-steps-item-icon .ant-steps-icon {
+  color: white !important;
+  font-weight: 600;
+}
+
+/* Active step circle */
+.ant-steps-item-process .ant-steps-item-icon {
+  background-color: #A855F7 !important;
+  border-color: #A855F7 !important;
+}
+
+/* Completed step circle */
+.ant-steps-item-finish .ant-steps-item-icon {
+  background-color: #00C26F !important;       /* finish color */
+  border-color: #00C26F !important;
+}
+
+/* ===== Line Color Between Steps ===== */
+.ant-steps-item-process > .ant-steps-item-container > .ant-steps-item-tail::after,
+.ant-steps-item-finish > .ant-steps-item-container > .ant-steps-item-tail::after,
+.ant-steps-item-wait > .ant-steps-item-container > .ant-steps-item-tail::after {
+  background-color: #2A155A !important;   /* line color */
+}
