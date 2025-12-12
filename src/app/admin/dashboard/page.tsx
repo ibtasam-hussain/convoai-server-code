@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useState } from "react";
 import {
@@ -25,38 +25,36 @@ export default function Dashboard() {
   return (
     <div className="w-full min-h-screen bg-gray-50">
       {/* Header */}
-<header className="bg-white px-4 sm:px-6 py-4 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 shadow-sm sticky top-0 z-10">
-  
-  {/* LEFT - Welcome */}
-  <h1 className="text-xl sm:text-2xl font-medium text-gray-800 min-w-max">
-    Welcome back,<br className="lg:hidden" /> John
-  </h1>
+      <header className="bg-white px-4 sm:px-6 py-4 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 shadow-sm sticky top-0 z-10">
+        {/* LEFT - Welcome */}
+        <h1 className="text-xl sm:text-2xl font-medium text-gray-800 min-w-max">
+          Welcome back,<br className="lg:hidden" /> John
+        </h1>
 
-  {/* CENTER - Search */}
-  <div className="flex-1 w-full lg:max-w-xl relative">
-    <Search
-      size={18}
-      className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-    />
-    <input
-      type="text"
-      placeholder="Search"
-      className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-[#4A0082]"
-    />
-  </div>
+        {/* CENTER - Search */}
+        <div className="flex-1 w-full lg:max-w-xl relative">
+          <Search
+            size={18}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+          />
+          <input
+            type="text"
+            placeholder="Search"
+            className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-[#4A0082]"
+          />
+        </div>
 
-  {/* RIGHT - Buttons */}
-  <div className="flex items-center gap-3 justify-end w-full lg:w-auto">
-    <button className="bg-[#4A0082] text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-[#3b0069] text-sm">
-      Test Call <ExternalLink size={16} />
-    </button>
+        {/* RIGHT - Buttons */}
+        <div className="flex items-center gap-3 justify-end w-full lg:w-auto">
+          <button className="bg-[#4A0082] text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-[#3b0069] text-sm">
+            Test Call <ExternalLink size={16} />
+          </button>
 
-    <button className="bg-[#4A0082] text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-[#3b0069] text-sm">
-      Test Chat <ExternalLink size={16} />
-    </button>
-  </div>
-</header>
-
+          <button className="bg-[#4A0082] text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-[#3b0069] text-sm">
+            Test Chat <ExternalLink size={16} />
+          </button>
+        </div>
+      </header>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 px-4 sm:px-6 pt-6">

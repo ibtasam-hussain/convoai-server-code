@@ -53,7 +53,7 @@ export async function listOrganizations(token?: string) {
 
 // ✅ READ (single)
 export async function getOrganization(id: number, token?: string) {
-  const res = await api.get(`/organizations/${id}`, {
+  const res = await api.get(`/organizations/organization/${id}`, {
   });
   return res.data;
 }

@@ -7,72 +7,38 @@ export const getUsersByOrganization = async (organizationId: number) => {
 };
 
 // 🔹 Create user
-export const createUser = async (data: any) => {
-  const formData = new FormData();
-  Object.entries(data).forEach(([key, val]) => {
-    if (val !== null && val !== undefined) {
-      // Handle File objects and other types properly
-      if (val instanceof File) {
-        formData.append(key, val);
-      } else if (typeof val === 'object' && !(val instanceof File)) {
-        // Stringify objects/arrays
-        formData.append(key, JSON.stringify(val));
-      } else {
-        formData.append(key, String(val));
-      }
-    }
-  });
+export const createUser = async (formData: FormData) => {
+  console.log("📤 Sending FormData keys:", Array.from(formData.keys()));
 
-  console.log("📤 Creating user with FormData keys:", Array.from(formData.keys()));
-
-  const res = await api.post("/users/add", formData, {
-    headers: { 
-      "Content-Type": "multipart/form-data",
-    },
-  });
+  const res = await api.post("/users/add", formData);
   return res.data;
 };
 
+
+
 // 🔹 Update user
-export const updateUser = async (data: any) => {
-  if (!data.userId) {
+export const updateUser = async (formData: FormData) => {
+  const userId = formData.get("id");
+
+  if (!userId) {
     throw new Error("userId is required for updateUser()");
   }
 
-  const userId = data.userId;
-  // Remove userId from data before creating FormData (it goes in URL, not body)
-  const { userId: _, ...userData } = data;
+  // Remove id from body (it should go in URL)
+  formData.delete("id");
 
-  const formData = new FormData();
-  Object.entries(userData).forEach(([key, val]) => {
-    if (val !== null && val !== undefined) {
-      // Handle File objects and other types properly
-      if (val instanceof File) {
-        formData.append(key, val);
-      } else if (typeof val === 'object' && !(val instanceof File)) {
-        // Stringify objects/arrays
-        formData.append(key, JSON.stringify(val));
-      } else {
-        formData.append(key, String(val));
-      }
-    }
-  });
-
-  console.log("🧾 Sending FormData for update:", Array.from(formData.keys()));
   console.log("🧾 Updating user ID:", userId);
+  console.log("🧾 Sending FormData keys:", Array.from(formData.keys()));
 
-  const res = await api.patch(`/users/${userId}`, formData, {
-    headers: { 
-      "Content-Type": "multipart/form-data",
-    },
-  });
-
+  const res = await api.patch(`/users/${userId}`, formData);
   return res.data;
 };
+
 
 
 // 🔹 Delete user
 export const deleteUser = async (userId: number) => {
+  console.log("🗑️ Deleting user with ID:", userId);
   const res = await api.delete(`/users/${userId}`);
   return res.data;
 };

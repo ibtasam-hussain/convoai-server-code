@@ -25,3 +25,10 @@ export const toggleAgent = async (id: number) => {
   const res = await api.patch(`/agents/toggle/${id}`);
   return res.data;
 };
+
+// getMyAgents
+
+export const getMyAgents = async () => {
+  const res = await api.get("/agents/myagents");
+  return res.data;
+};

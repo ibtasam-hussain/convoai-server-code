@@ -47,7 +47,7 @@ const [wizardKey, setWizardKey] = useState(0);
       const token = localStorage.getItem("token");
       try {
         setLoading(true);
-        const res = await axios.get(`${API_URL}/organizations/${id}`, {
+        const res = await axios.get(`${API_URL}/organizations/organization/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setOrg(res.data);
@@ -67,6 +67,7 @@ const [wizardKey, setWizardKey] = useState(0);
       setLoadingAgents(true);
       const data = await getAgents(orgId);
       setAgents(data);
+      console.log("Fetched agents:", data);
     } catch {
       message.error("Failed to load agents");
     } finally {
@@ -212,6 +213,8 @@ ${formData.description || "No description provided."}`;
     setCurrentStep(0);
   };
 
+
+  
   if (loading)
     return (
       <div className="flex items-center justify-center min-h-screen text-gray-600">
@@ -290,35 +293,43 @@ ${formData.description || "No description provided."}`;
       "
       onClick={() => handleAgentClick(a)}
     >
-      {/* Toggle Button */}
-      <div className="absolute top-4 right-4 z-20">
-        <label className="flex items-center cursor-pointer">
-          <input
-            type="checkbox"
-            className="sr-only peer"
-            checked={a.isActive}
-            onChange={async (e) => {
-              e.stopPropagation();
-              try {
-                await toggleAgent(a.id);
-                // Update local state to reflect the change
-                setAgents((prev: any[]) => 
-                  prev.map((agent: any) => 
-                    agent.id === a.id ? { ...agent, isActive: !agent.isActive } : agent
-                  )
-                );
-                message.success(`${a.name} is now ${!a.isActive ? 'active' : 'inactive'}`);
-              } catch (err) {
-                console.error("Toggle error:", err);
-                message.error("Failed to toggle agent status");
-              }
-            }}
-          />
-          <div className="w-12 h-6 bg-gray-300 rounded-full peer-checked:bg-green-500 relative transition">
-            <span className="absolute top-1 left-1 h-4 w-4 bg-white rounded-full transition peer-checked:left-7"></span>
-          </div>
-        </label>
-      </div>
+<div className="absolute top-4 right-4 z-20">
+<label className="flex items-center cursor-pointer">
+  <input
+    type="checkbox"
+    className="sr-only peer"
+    checked={a.isActive}
+    onChange={async (e) => {
+      e.stopPropagation();
+      try {
+        await toggleAgent(a.id);
+        setAgents((prev: any[]) =>
+          prev.map((agent: any) =>
+            agent.id === a.id
+              ? { ...agent, isActive: !agent.isActive }
+              : agent
+          )
+        );
+        message.success(
+          `${a.name} is now ${!a.isActive ? "active" : "inactive"}`
+        );
+      } catch (err) {
+        console.error("Toggle error:", err);
+        message.error("Failed to toggle agent status");
+      }
+    }}
+  />
+  <div className="relative w-12 h-6 bg-gray-300 rounded-full peer-checked:bg-green-500 transition-all duration-300 ease-in-out">
+    <span
+      className={`absolute top-1 left-1 h-4 w-4 bg-white rounded-full transition-all duration-300 ease-in-out ${
+        a.isActive ? "translate-x-6" : "translate-x-0"
+      }`}
+    ></span>
+  </div>
+</label>
+</div>
+
+
 
       {/* Image */}
       <div className="h-[150px] bg-white flex items-center justify-center">
@@ -354,11 +365,11 @@ ${formData.description || "No description provided."}`;
 
 <Button
   className="flex-1 bg-[#A855F7] border-none text-white"
-  onClick={(e) => {
-    e.stopPropagation();
-    // Open in new window/tab
-    window.open(`/chat/${a.id}?agent=${a.name}`, '_blank');
-  }}
+  // onClick={(e) => {
+  //   e.stopPropagation();
+  //   // Open in new window/tab
+  //   window.open(`/chat/${a.id}?agent=${a.name}`, '_blank');
+  // }}
 >
   Test Chat
 </Button>

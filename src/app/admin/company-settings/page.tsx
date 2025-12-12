@@ -67,45 +67,56 @@ export default function AccountPage() {
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  useEffect(() => {
-    const controller = new AbortController();
-    (async () => {
-      setLoading(true);
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) return;
+useEffect(() => {
+  const controller = new AbortController();
+  (async () => {
+    setLoading(true);
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) return;
 
-        const res = await axios.get<UserMe>(`${apiUrl}/users/me`, {
-          headers: { Authorization: `Bearer ${token}` },
-          signal: controller.signal,
-        });
+      const res = await axios.get<{ company: CompanyProfile }>(`${apiUrl}/organizations/myorganization`, {
+        headers: { Authorization: `Bearer ${token}` },
+        signal: controller.signal,
+      });
 
-        const c = (res.data?.company ?? {}) as Partial<CompanyProfile>;
-        const comp: CompanyProfile = {
-          id: c.id ?? undefined,
-          name: c.name ?? "",
-          email: c.email ?? "",
-          region: c.region ?? "",
-          language: c.language ?? "",
-          logo: c.logo ?? null,
-          bio: c.bio ?? "",
-        };
+      console.log("Fetched UserMe status:", res);
+      console.log("Fetched UserMe payload:", res.data);
 
-        setCompany(comp);
-        // keep pretty region in the controlled select
-        setForm({ ...comp, region: displayRegion(comp.region) });
-        setLogoPreview(comp.logo ?? null);
-      } catch (err: any) {
-        if (!axios.isCancel(err)) {
-          console.error(err);
-          toast.error(err?.response?.data?.error || "Failed to load company profile.");
-        }
-      } finally {
-        setLoading(false);
+      // Now that we're correctly typing `res.data` to include `company`
+      const c = res.data;
+
+      if (!c || !c.id || !c.name || !c.email || !c.region || !c.language) {
+        throw new Error("Company data is missing required fields.");
       }
-    })();
-    return () => controller.abort();
-  }, []);
+
+      const comp: CompanyProfile = {
+        id: c.id ?? undefined,
+        name: c.name ?? "",
+        email: c.email ?? "",
+        region: c.region ?? "",
+        language: c.language ?? "",
+        logo: c.logo ?? null,
+        bio: c.bio ?? "",
+      };
+
+      // Set the company and form state
+      setCompany(comp);
+      setForm({ ...comp, region: displayRegion(comp.region) }); // Pretty region
+      setLogoPreview(comp.logo ?? null); // Set logo preview
+    } catch (err: any) {
+      if (!axios.isCancel(err)) {
+        console.error(err);
+        toast.error(err?.response?.data?.error || "Failed to load company profile.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  })();
+  return () => controller.abort();
+}, []);
+
+
 
   const pickLogo = () => fileInputRef.current?.click();
 
@@ -124,62 +135,6 @@ export default function AccountPage() {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
-  const handleSave = async () => {
-    setSaving(true);
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        toast.error("Not authenticated.");
-        return;
-      }
-
-      // always send multipart
-      const fd = new FormData();
-      fd.append("name", form.name);
-      fd.append("email", form.email);
-      fd.append("region", toDbRegion(form.region));
-      fd.append("language", form.language);
-      fd.append("bio", form.bio ?? "");
-      if (logoFile) fd.append("logo", logoFile);
-
-      // NOTE: adjust path if your router isn't mounted at /users
-      const res = await axios.patch<CompanyProfile>(
-        `${apiUrl}/users/edit-company`,
-        fd,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-
-      const updated = res.data;
-      const normalized: CompanyProfile = {
-        id: updated.id,
-        name: updated.name ?? "",
-        email: updated.email ?? "",
-        region: updated.region ?? "",
-        language: updated.language ?? "",
-        logo: updated.logo ?? null,
-        bio: updated.bio ?? "",
-      };
-      setCompany(normalized);
-      setForm({
-        ...normalized,
-        region: displayRegion(normalized.region), // keep pretty in UI
-      });
-      setLogoFile(null);
-      setLogoPreview(normalized.logo ?? null);
-
-      toast.success("Company settings saved.");
-    } catch (err: any) {
-      console.error(err);
-      toast.error(err?.response?.data?.error || "Failed to save company settings.");
-    } finally {
-      setSaving(false);
-    }
-  };
 
   return (
     <main className="min-h-screen bg-[#F6F7FB]">
@@ -213,14 +168,14 @@ export default function AccountPage() {
                   </span>
                 )}
               </div>
-              <button
+              {/* <button
                 type="button"
                 onClick={pickLogo}
                 className="mt-3 text-[12px] font-medium text-[#6C3DD3] hover:underline"
                 disabled={loading}
               >
                 Change Logo
-              </button>
+              </button> */}
               <input
                 ref={fileInputRef}
                 type="file"
@@ -251,86 +206,83 @@ export default function AccountPage() {
             </div>
           </div>
         </section>
+<section className="mt-10">
+  <h2 className="text-[18px] font-semibold text-[#232323]">Company Details</h2>
 
-        {/* Company Details */}
-        <section className="mt-10">
-          <h2 className="text-[18px] font-semibold text-[#232323]">
-            Company Details
-          </h2>
+  <div className="mt-5 space-y-5">
+    {/* Company Name */}
+    <FieldRow label="Company Name">
+      <input
+        value={form.name}
+        onChange={(e) => onChange("name", e.target.value)}
+        className="h-11 w-full rounded-md bg-white border border-[#E6E8EF] text-[#232323] text-sm px-4 placeholder-[#8E96A3]"
+        placeholder="Company name"
+        disabled={loading}
+      />
+    </FieldRow>
 
-          <div className="mt-5 space-y-5">
-            {/* Company Name */}
-            <FieldRow label="Company Name">
-              <input
-                value={form.name}
-                onChange={(e) => onChange("name", e.target.value)}
-                className="h-11 w-full rounded-md bg-white border border-[#E6E8EF] text-[#232323] text-sm px-4 placeholder-[#8E96A3]"
-                placeholder="Company name"
-                disabled={loading}
-              />
-            </FieldRow>
+    {/* Email */}
+    <FieldRow label="Email">
+      <input
+        type="email"
+        value={form.email}
+        onChange={(e) => onChange("email", e.target.value)}
+        className="h-11 w-full rounded-md bg-white border border-[#E6E8EF] text-[#232323] text-sm px-4 placeholder-[#8E96A3]"
+        placeholder="Company email"
+        disabled={loading}
+      />
+    </FieldRow>
 
-            {/* Email */}
-            <FieldRow label="Email">
-              <input
-                type="email"
-                value={form.email}
-                onChange={(e) => onChange("email", e.target.value)}
-                className="h-11 w-full rounded-md bg-white border border-[#E6E8EF] text-[#232323] text-sm px-4 placeholder-[#8E96A3]"
-                placeholder="Company email"
-                disabled={loading}
-              />
-            </FieldRow>
+    {/* Region */}
+    <FieldRow label="Region">
+      <div className="relative">
+        <select
+          value={form.region} // already pretty
+          onChange={(e) => onChange("region", e.target.value)}
+          className="h-11 w-full appearance-none rounded-md bg-white border border-[#E6E8EF] text-[#232323] text-sm px-4 pr-10"
+          disabled={loading}
+        >
+          <option value="">Select region</option>
+          {REGIONS.map((r) => (
+            <option key={r} value={r}>
+              {r}
+            </option>
+          ))}
+        </select>
+        <ChevronDown
+          size={16}
+          className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#8E96A3]"
+        />
+      </div>
+    </FieldRow>
 
-            {/* Region */}
-            <FieldRow label="Region">
-              <div className="relative">
-                <select
-                  value={form.region} // already pretty
-                  onChange={(e) => onChange("region", e.target.value)}
-                  className="h-11 w-full appearance-none rounded-md bg-white border border-[#E6E8EF] text-[#232323] text-sm px-4 pr-10"
-                  disabled={loading}
-                >
-                  <option value="">Select region</option>
-                  {REGIONS.map((r) => (
-                    <option key={r} value={r}>
-                      {r}
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown
-                  size={16}
-                  className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#8E96A3]"
-                />
-              </div>
-            </FieldRow>
+    {/* Language */}
+    <FieldRow label="Language">
+      <div className="relative">
+        <select
+          value={form.language}
+          onChange={(e) => onChange("language", e.target.value)}
+          className="h-11 w-full appearance-none rounded-md bg-white border border-[#E6E8EF] text-[#232323] text-sm px-4 pr-10"
+          disabled={loading}
+        >
+          <option value="">Select language</option>
+          {LANGS.map((l) => (
+            <option key={l} value={l}>
+              {l}
+            </option>
+          ))}
+        </select>
+        <ChevronDown
+          size={16}
+          className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#8E96A3]"
+        />
+      </div>
+    </FieldRow>
+  </div>
+</section>
 
-            {/* Language */}
-            <FieldRow label="Language">
-              <div className="relative">
-                <select
-                  value={form.language}
-                  onChange={(e) => onChange("language", e.target.value)}
-                  className="h-11 w-full appearance-none rounded-md bg-white border border-[#E6E8EF] text-[#232323] text-sm px-4 pr-10"
-                  disabled={loading}
-                >
-                  <option value="">Select language</option>
-                  {LANGS.map((l) => (
-                    <option key={l} value={l}>
-                      {l}
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown
-                  size={16}
-                  className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#8E96A3]"
-                />
-              </div>
-            </FieldRow>
-          </div>
-        </section>
 
-        {/* Save button */}
+        {/* Save button
         <div className="mt-10">
           <button
             type="button"
@@ -340,7 +292,7 @@ export default function AccountPage() {
           >
             {saving ? "Saving…" : "Save"}
           </button>
-        </div>
+        </div> */}
       </div>
     </main>
   );

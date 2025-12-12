@@ -53,14 +53,6 @@ const StartPage = ({ searchParams }) => {
   const handleEnd = () => {
     setStart(false);
     endConversation(); // end webrtc
-
-    // Logout functionality
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    // Clear any other auth-related items
-
-    // Navigate to login page
-    router.push("/login");
   };
 
   useEffect(() => {

@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import Link from "next/link";
 import {
@@ -12,6 +12,7 @@ import {
   HelpCircle,
   ChevronDown,
   ChevronRight,
+  ChevronLeft,
   Building2,
   Grid2x2,
 } from "lucide-react";
@@ -20,8 +21,8 @@ import Logo from "../../../public/assets/Admin/dashboard/logo.svg";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
-const BASE_W = 288; // 18rem
-const FLYOUT_W = 280; // flyout width
+const BASE_W = 288; // Base Sidebar Width (18rem)
+const FLYOUT_W = 280; // Flyout Width for Admin Panel
 
 type AppUser = {
   name?: string;
@@ -35,6 +36,8 @@ const Sidebar = () => {
 
   const [openAdmin, setOpenAdmin] = useState(false);
   const [user, setUser] = useState<AppUser | null>(null);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);  // New state for dropdown
 
   // Load user from localStorage
   const loadUserFromStorage = () => {
@@ -47,7 +50,6 @@ const Sidebar = () => {
     }
   };
 
-  // Sync user on mount & storage change
   useEffect(() => {
     loadUserFromStorage();
 
@@ -66,42 +68,45 @@ const Sidebar = () => {
     };
   }, []);
 
-  // ROLE LOGIC
   const role = user?.role?.toLowerCase() || "user";
-
   const isSuperAdmin = role === "super-admin";
   const isAdminOnly = role === "admin";
-  const isViewer = role === "user";
+const isViewer = role === "viewer";
 
   const isAdmin = isSuperAdmin || isAdminOnly;
 
-  // auto-open flyout on admin pages
   useEffect(() => {
     if (!isAdmin) {
       setOpenAdmin(false);
       return;
     }
 
-    const inAdmin =
-      pathname.startsWith("/admin/company-settings") ||
-      pathname.startsWith("/admin/users") ||
-      pathname.startsWith("/admin/integration");
+const inAdmin =
+  pathname.startsWith("/admin/company-settings") ||
+  pathname.startsWith("/admin/agents") ||
+  pathname.startsWith("/admin/integration");
+
 
     setOpenAdmin(inAdmin);
   }, [pathname, isAdmin]);
 
-  // Non-admin users cannot access admin routes
-  useEffect(() => {
-    if (isAdmin) return;
+useEffect(() => {
+  // Admins are allowed everywhere
+  if (isAdmin) return;
 
-    const restricted =
-      pathname.startsWith("/admin/company-settings") ||
-      pathname.startsWith("/admin/users") ||
-      pathname.startsWith("/admin/integration") ||
-      pathname.startsWith("/admin/organizations");
+  // Viewer restrictions
+  const restricted =
+    pathname.startsWith("/admin/company-settings") ||
+    pathname.startsWith("/admin/integration") ||
+    pathname.startsWith("/admin/organizations") ||
+    pathname.startsWith("/admin/agents"); // admin agents page
 
-    if (restricted) router.replace("/admin/account");
-  }, [pathname, isAdmin, router]);
+  // ✅ Viewer allowed ONLY on users-agent
+  if (restricted && !pathname.startsWith("/admin/users-agent")) {
+    router.replace("/admin/account");
+  }
+}, [pathname, isAdmin, router]);
+
 
   const sidebarWidth = useMemo(
     () => BASE_W + (isAdmin && openAdmin ? FLYOUT_W : 0),
@@ -112,29 +117,44 @@ const Sidebar = () => {
     isAdmin &&
     (openAdmin ||
       pathname.startsWith("/admin/company-settings") ||
-      pathname.startsWith("/admin/users") ||
+      pathname.startsWith("/admin/agents") ||
       pathname.startsWith("/admin/integration"));
 
-  // Avatar
   const avatarSrc =
     user?.image ||
     "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='80' height='80'><rect width='100%' height='100%' fill='%236b46c1'/><text x='50%' y='54%' dominant-baseline='middle' text-anchor='middle' fill='white' font-family='Arial' font-size='28'>U</text></svg>";
 
   return (
     <div
-      className="relative bg-[#1E0B40] text-white flex flex-col rounded-r-4xl h-screen sticky top-0 overflow-hidden"
+      className={`relative bg-[#1E0B40] text-white flex flex-col rounded-r-4xl h-screen sticky top-0 overflow-hidden transition-all duration-300 ease-in-out ${
+        isSidebarCollapsed ? "w-[80px]" : `${sidebarWidth}px`
+      }`}
       style={{
-        width: `${sidebarWidth}px`,
         ["--sidebar-w" as any]: `${sidebarWidth}px`,
       }}
     >
-      <div className="w-[18rem] h-full overflow-y-auto flex flex-col">
+      <div className="w-full h-full overflow-y-auto flex flex-col">
         {/* Logo */}
         <div className="p-8 flex items-center gap-5">
           <Image src={Logo} alt="logo" width={40} height={40} />
-          <span className="text-2xl font-semibold">ConverAIx</span>
+          {!isSidebarCollapsed && (
+            <span className="text-2xl font-semibold">ConverAIx</span>
+          )}
         </div>
 
+        {/* Toggle Button for Collapsing Sidebar */}
+        <button
+          onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+          className="absolute top-5 right-2 sm:hidden p-2 bg-[#1B0A3A] rounded-full text-white"
+        >
+          {isSidebarCollapsed ? (
+            <ChevronRight size={24} />
+          ) : (
+            <ChevronLeft size={24} />
+          )}
+        </button>
+
+        {/* Navigation */}
         <nav className="px-4 py-4 mb-6 flex-1 overflow-y-auto">
           <NavItem
             className="my-4"
@@ -142,24 +162,24 @@ const Sidebar = () => {
             icon={<Star size={20} />}
             label="Dashboard"
             active={pathname === "/admin/dashboard"}
+            isSidebarCollapsed={isSidebarCollapsed}
           />
-
           <NavItem
             className="my-4"
             href="/admin/call-logs"
             icon={<Phone size={20} />}
             label="Call Logs"
             active={pathname === "/admin/call-logs"}
+            isSidebarCollapsed={isSidebarCollapsed}
           />
-
           <NavItem
             className="my-4"
             href="/admin/chat-logs"
             icon={<MessageSquare size={20} />}
             label="Chat Logs"
             active={pathname === "/admin/chat-logs"}
+            isSidebarCollapsed={isSidebarCollapsed}
           />
-
           <NavItem
             className="my-4"
             href="/admin/tickets"
@@ -167,8 +187,8 @@ const Sidebar = () => {
             label="Ticket Logs"
             badge="99+"
             active={pathname === "/admin/tickets"}
+            isSidebarCollapsed={isSidebarCollapsed}
           />
-
           <NavItem
             className="my-4"
             href="/admin/pending-chats"
@@ -176,47 +196,99 @@ const Sidebar = () => {
             label="Pending Chats"
             badge="99+"
             active={pathname === "/admin/pending-chats"}
+            isSidebarCollapsed={isSidebarCollapsed}
           />
-
           <NavItem
             className="my-4"
             href="/admin/knowledge-sources"
             icon={<BookOpen size={20} />}
             label="Knowledge Sources"
             active={pathname === "/admin/knowledge-sources"}
+            isSidebarCollapsed={isSidebarCollapsed}
           />
 
-          {/* ADMIN PANEL — visible to SUPERADMIN + ADMIN */}
-          {isAdmin && (
-            <NavItem
-              className="my-4"
-              href="/admin/company-settings"
-              icon={<UsersIcon size={20} />}
-              label="Admin Panel"
-              active={isAdminActive}
-              accessory={
-                <ChevronRight
-                  size={16}
-                  className={`transition-transform ${openAdmin ? "rotate-90" : ""}`}
-                />
-              }
-              onClick={() => setOpenAdmin(true)}
-            />
-          )}
+{isViewer && (
+  <NavItem
+    href="/admin/my-agent"
+    icon={<UsersIcon size={18} />}
+    label="Agents"
+    active={pathname.startsWith("/admin/my-agent")}
+    isSidebarCollapsed={isSidebarCollapsed}
+  />
+)}
 
-          {/* MASTER ADMIN — ONLY SUPER ADMIN */}
-          {isSuperAdmin && (
-            <NavItem
-              className="my-4"
-              href="/admin/organizations"
-              icon={<BookOpen size={20} />}
-              label="Master Admin"
-              active={pathname.startsWith("/admin/organization")}
-            />
-          )}
+{/* Admin Panel */}
+{isAdmin && !isSuperAdmin && (  // Exclude Super Admin here
+  <div>
+    <NavItem
+      className="my-4"
+      href="/admin/company-settings"
+      icon={<UsersIcon size={20} />}
+      label="Admin Panel"
+      active={isAdminActive}
+      accessory={
+        <ChevronRight
+          size={16}
+          className={`transition-transform ${dropdownOpen ? "rotate-90" : ""}`}
+        />
+      }
+      onClick={() => setDropdownOpen(!dropdownOpen)}
+      isSidebarCollapsed={isSidebarCollapsed}
+    />
+    {/* Dropdown for Admin Panel */}
+    {dropdownOpen && (
+      <div className="pl-8 mt-2 space-y-2">
+        {/* Company Settings */}
+        <NavItem
+          href="/admin/company-settings"
+          icon={<Building2 size={18} />}
+          label="Company Settings"
+          active={pathname.startsWith("/admin/company-settings")}
+          isSidebarCollapsed={isSidebarCollapsed}
+        />
+        {/* Users */}
+
+        {/* Agents */}
+        <NavItem
+          href="/admin/agents"
+          icon={<UsersIcon size={18} />}
+          label="Agents"
+          active={pathname.startsWith("/admin/agents")}
+          isSidebarCollapsed={isSidebarCollapsed}
+        />
+        {/* Integration */}
+        <NavItem
+          href="/admin/integration"
+          icon={<Grid2x2 size={18} />}
+          label="Integration"
+          active={pathname.startsWith("/admin/integration")}
+          isSidebarCollapsed={isSidebarCollapsed}
+        />
+      </div>
+    )}
+  </div>
+)}
+
+
+
+{/* Master Admin */}
+{isSuperAdmin && (
+  <NavItem
+    className="my-4"
+    href="/admin/organizations"
+    icon={<BookOpen size={20} />}
+    label="Master Admin"
+    active={pathname.startsWith("/admin/organization")}
+    isSidebarCollapsed={isSidebarCollapsed}
+  />
+)}
+
+
+
+
         </nav>
 
-        {/* FOOTER */}
+        {/* Footer */}
         <div className="mt-auto">
           <Link
             href="/admin/support"
@@ -247,85 +319,33 @@ const Sidebar = () => {
             <ChevronDown size={16} />
           </Link>
         </div>
-        {/* LOGOUT BUTTON */}
-<button
-  onClick={() => {
-    localStorage.removeItem("user");
-    window.dispatchEvent(new Event("userUpdated"));
-    window.location.href = "/admin/login";
-  }}
-  className="p-4 w-full text-left flex items-center gap-3 border-t border-[#3B1D63] hover:bg-red-500/20 text-red-400 rounded-md transition-colors"
->
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    className="h-5 w-5"
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1"
-    />
-  </svg>
 
-  <span className="text-sm font-medium">Logout</span>
-</button>
-
+        {/* Logout Button */}
+        <button
+          onClick={() => {
+            localStorage.removeItem("user");
+            window.dispatchEvent(new Event("userUpdated"));
+            window.location.href = "/admin/login";
+          }}
+          className="p-4 w-full text-left flex items-center gap-3 border-t border-[#3B1D63] hover:bg-red-500/20 text-red-400 rounded-md transition-colors"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-5 w-5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1"
+            />
+          </svg>
+          <span className="text-sm font-medium">Logout</span>
+        </button>
       </div>
-
-      {/* RIGHT FLYOUT — visible to ADMIN + SUPERADMIN */}
-      {isAdmin && openAdmin && (
-        <div className="absolute top-0 right-0 h-full w-[280px] bg-[#1B0A3A] border-l border-white/10 shadow-2xl overflow-y-auto">
-          <div className="p-6">
-            <div className="mb-6">
-              <Link
-                href="/admin/company-settings"
-                onClick={() => setOpenAdmin(true)}
-                className={`flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold shadow-lg transition-colors
-                  ${
-                    pathname.startsWith("/admin/company-settings")
-                      ? "bg-gradient-to-r from-[#8B3DCC] to-[#B26CFF] text-white"
-                      : "bg-white/10 hover:bg-white/15"
-                  }`}
-              >
-                <Building2 size={18} />
-                <span>Company Setting</span>
-              </Link>
-            </div>
-
-            <div className="space-y-2">
-              <Link
-                href="/admin/users"
-                onClick={() => setOpenAdmin(true)}
-                className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm transition-colors hover:bg-white/10 ${
-                  pathname.startsWith("/admin/users")
-                    ? "bg-[#A855F7] text-white"
-                    : "text-white"
-                }`}
-              >
-                <UsersIcon size={18} />
-                <span>Users</span>
-              </Link>
-
-              <Link
-                href="/admin/integration"
-                onClick={() => setOpenAdmin(true)}
-                className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm transition-colors hover:bg-white/10 ${
-                  pathname.startsWith("/admin/integration")
-                    ? "bg-[#A855F7] text-white"
-                    : "text-white"
-                }`}
-              >
-                <Grid2x2 size={18} />
-                <span>Integration</span>
-              </Link>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
@@ -339,6 +359,7 @@ type NavItemProps = {
   className?: string;
   onClick?: () => void;
   accessory?: React.ReactNode;
+  isSidebarCollapsed?: boolean;
 };
 
 function NavItem({
@@ -350,6 +371,7 @@ function NavItem({
   className = "",
   onClick,
   accessory,
+  isSidebarCollapsed = false,
 }: NavItemProps) {
   return (
     <Link href={href} className={`block ${className}`} onClick={onClick}>
@@ -359,7 +381,7 @@ function NavItem({
         }`}
       >
         <div className="mr-3">{icon}</div>
-        <span className="flex-1 text-sm font-medium">{label}</span>
+        {!isSidebarCollapsed && <span className="flex-1 text-sm font-medium">{label}</span>}
 
         {badge && (
           <span className="bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full font-bold">
