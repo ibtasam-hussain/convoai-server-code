@@ -61,26 +61,26 @@ const [selectedUser, setSelectedUser] = useState<User | null>(null);
   }, [agentId]);
 
   /* ------------------ FETCH USERS ------------------ */
-  const fetchUsers = async () => {
-    try {
-      setLoadingUsers(true);
-      const token = localStorage.getItem("token");
-      const organizationId = JSON.parse(
-        localStorage.getItem("user") || "{}"
-      ).organizationId;
+const fetchUsers = async () => {
+  try {
+    setLoadingUsers(true);
+    const token = localStorage.getItem("token");
 
-      const res = await axios.get(
-        `${API_URL}/users/organization/${organizationId}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+    const res = await axios.get(
+      `${API_URL}/users/${agentId}`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
 
-      setUsers(res.data.users || res.data);
-    } catch {
-      console.error("Failed to load users");
-    } finally {
-      setLoadingUsers(false);
-    }
-  };
+    setUsers(res.data);
+    console.log(res.data);
+  } catch (err) {
+    console.error("Failed to load users", err);
+  } finally {
+    setLoadingUsers(false);
+  }
+};
 
 const handleDeleteUser = async (userId: number) => {
   try {
@@ -130,7 +130,6 @@ const handleDeleteUser = async (userId: number) => {
   "
       >
         {/* LEFT: IMAGE (50%) */}
-        {/* LEFT: IMAGE (50%) */}
         <div className="h-full w-full p-4">
           <div className="w-full h-full rounded-xl border border-white/20 overflow-hidden bg-black/10">
             {agent.avatar ? (
@@ -166,7 +165,14 @@ const handleDeleteUser = async (userId: number) => {
           )}
         </div>
       </div>
-
+    <div>
+      <h2 className="text-4xl font-semibold text-[#232323]">
+        Users
+      </h2>
+      <p className="text-sm text-gray-500 mt-1">
+        Manage users associated with this agent
+      </p>
+    </div>
 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
 
   {/* EXISTING USERS */}
@@ -261,18 +267,20 @@ const handleDeleteUser = async (userId: number) => {
 
 </div>
         {isUserModalOpen && (
-  <UserModal
-    mode={modalMode}
-    user={selectedUser || undefined}
-    onClose={() => {
-      setIsUserModalOpen(false);
-      setSelectedUser(null);
-    }}
-    onSuccess={() => {
-      setIsUserModalOpen(false);
-      fetchUsers();
-    }}
-  />
+<UserModal
+  mode={modalMode}
+  user={selectedUser || undefined}
+  agentId={Number(agentId)}
+  onClose={() => {
+    setIsUserModalOpen(false);
+    setSelectedUser(null);
+  }}
+  onSuccess={() => {
+    setIsUserModalOpen(false);
+    fetchUsers();
+  }}
+/>
+
 )}
 
     </main>

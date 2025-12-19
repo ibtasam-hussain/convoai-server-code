@@ -2,20 +2,20 @@
 import { useState, useEffect } from "react";
 import { Card, Input, Select, Button, Modal, message, Upload } from "antd";
 import { PlusOutlined, ExclamationCircleOutlined, UploadOutlined } from "@ant-design/icons";
-import {
-  getUsersByOrganization,
-  createUser,
-  updateUser,
-  deleteUser,
-} from "@/Components/services/users";
+import axios from "axios";
+import { createUser, updateUser, deleteUser } from "@/Components/services/users";
+
 
 const { Option } = Select;
 
 interface Step4Props {
   organizationId: number;
+  agentId: number; // ✅ REQUIRED
 }
 
-export default function Step4_Confirmation({ organizationId }: Step4Props) {
+
+export default function Step4_Confirmation({   organizationId,
+  agentId, }: Step4Props) {
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
@@ -34,81 +34,72 @@ export default function Step4_Confirmation({ organizationId }: Step4Props) {
   });
 
   // 🟢 Fetch users for this org
-  useEffect(() => {
-    if (!organizationId) return;
-    fetchUsers();
-  }, [organizationId]);
+useEffect(() => {
+  if (!agentId) return;
+  fetchUsers();
+}, [agentId]);
 
-  const fetchUsers = async () => {
-    try {
-      setLoading(true);
-      const data = await getUsersByOrganization(organizationId);
-      setUsers(data);
-    } catch {
-      message.error("Failed to load users");
-    } finally {
-      setLoading(false);
-    }
-  };
+
+const fetchUsers = async () => {
+  if (!agentId) return;
+
+  try {
+    setLoading(true);
+    const token = localStorage.getItem("token");
+
+    const res = await axios.get(
+      `${process.env.NEXT_PUBLIC_API_URL}/users/${agentId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    setUsers(res.data);
+  } catch (err) {
+    console.error("Failed to load agent users", err);
+    message.error("Failed to load agent users");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   // 🟣 Save / Update
 const handleSave = async () => {
-  // VALIDATION CHECKS
-  if (!formData.name.trim()) {
-    message.error("Full Name is required!");
-    return;
-  }
+const fd = new FormData();
 
-  if (!formData.email.trim()) {
-    message.error("Email Address is required!");
-    return;
-  }
+fd.append("name", formData.name);
+fd.append("email", formData.email);
+fd.append("role", formData.role);
+fd.append("organizationId", String(organizationId));
+fd.append("agentId", String(agentId));
+fd.append("expiry", "1d");
 
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(formData.email)) {
-    message.error("Please enter a valid email address!");
-    return;
-  }
+// Password only if provided
+if (formData.password) {
+  fd.append("password", formData.password);
+}
 
-  // Password required for NEW user only
-  if (!selectedUser && !formData.password.trim()) {
-    message.error("Password is required for new users!");
-    return;
-  }
+// Image only for new or changed
+if (formData.image instanceof File) {
+  fd.append("image", formData.image);
+}
 
-  if (!formData.role) {
-    message.error("Please select a user role!");
-    return;
-  }
+setLoading(true);
 
-  // 🔥 IMAGE REQUIRED FOR NEW USER
-  if (!formData.image && !selectedUser) {
-    message.error("Profile Image is required!");
-    return;
-  }
+if (selectedUser) {
+  fd.append("id", String(selectedUser.id));
+  await updateUser(fd);
+  message.success("User updated successfully!");
+} else {
+  await createUser(fd);
+  message.success("New user added!");
+}
 
-  try {
-    const payload: any = {
-      ...formData,
-      organizationId,
-      expiry: "1d",
-    };
-
-    // Only include agentId if it's provided and valid
-    // For organization users, agentId is optional
-    if (formData.agentId) {
-      payload.agentId = formData.agentId;
-    }
-
-    setLoading(true);
-
-    if (selectedUser) {
-      await updateUser({ ...payload, userId: selectedUser.id });
-      message.success("User updated successfully!");
-    } else {
-      await createUser(payload);
-      message.success("New user added!");
-    }
+try {
+    await fetchUsers();
 
     resetForm();
     fetchUsers();
@@ -182,9 +173,9 @@ const handleSave = async () => {
 
   return (
     <div className="text-black relative">
-      <h2 className="text-xl font-semibold mb-4">Organization Users</h2>
+      <h2 className="text-xl font-semibold mb-4">Agent's Users</h2>
       <p className="text-sm text-gray-500 mb-6">
-        Manage your organization’s users, their roles, and access permissions.
+        Manage your agents users, their roles, and access permissions.
       </p>
 
       {/* 🟢 User Cards */}

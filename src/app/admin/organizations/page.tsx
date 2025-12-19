@@ -1,11 +1,12 @@
 "use client";
-import '@ant-design/v5-patch-for-react-19'; // Fix antd v5 compatibility with React 19
+import "@ant-design/v5-patch-for-react-19"; // Fix antd v5 compatibility with React 19
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { Card, Button, message, Spin, Popconfirm } from "antd";
 import { PlusOutlined, DeleteOutlined, EditOutlined } from "@ant-design/icons";
 import Step1_Account from "@/Components/steps/Account";
 import { useRouter } from "next/navigation";
+import { useRef } from "react";
 
 type Org = {
   id: number;
@@ -27,6 +28,7 @@ export default function OrganizationsPage() {
   const [formData, setFormData] = useState<any>({});
   const [loading, setLoading] = useState(false);
   const [editingOrg, setEditingOrg] = useState<Org | null>(null);
+  const formRef = useRef<HTMLDivElement | null>(null);
 
   // 🟢 Axios instance with token
   const api = axios.create({
@@ -37,6 +39,14 @@ export default function OrganizationsPage() {
       }`,
     },
   });
+  useEffect(() => {
+    if (showForm && formRef.current) {
+      formRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }
+  }, [showForm]);
 
   // 🟢 Fetch all organizations
   const fetchOrganizations = async () => {
@@ -66,54 +76,53 @@ export default function OrganizationsPage() {
   }, []);
 
   // 🟡 Create / Update Organization
-// 🟡 Create / Update Organization
-const handleSave = async () => {
-  if (!formData.name || !formData.email) {
-    message.warning("Please enter organization name and email!");
-    return;
-  }
-
-  const form = new FormData();
-  for (const key in formData) {
-    if (formData[key] !== undefined && formData[key] !== null) {
-      form.append(key, formData[key]);
-    }
-  }
-
-  setLoading(true);
-  try {
-    let orgId;
-
-    if (editingOrg) {
-      const res = await api.patch(`/organizations/${editingOrg.id}`, form);
-      orgId = editingOrg.id;
-      message.success("✅ Organization updated successfully!");
-    } else {
-      const res = await api.post(`/organizations`, form);
-      message.success("🎉 Organization added successfully!");
-      orgId = res.data?.id || res.data?.organization?.id;
+  // 🟡 Create / Update Organization
+  const handleSave = async () => {
+    if (!formData.name || !formData.email) {
+      message.warning("Please enter organization name and email!");
+      return;
     }
 
-    // Show loader before redirect
-    message.loading("Redirecting to organization page...", 1);
+    const form = new FormData();
+    for (const key in formData) {
+      if (formData[key] !== undefined && formData[key] !== null) {
+        form.append(key, formData[key]);
+      }
+    }
 
-    // Wait 1 second to display loader, then navigate
-    setTimeout(() => {
-      router.push(`/admin/organizations/${orgId}`);
-    }, 1000);
+    setLoading(true);
+    try {
+      let orgId;
 
-    // Reset form
-    setFormData({});
-    setShowForm(false);
-    setEditingOrg(null);
-  } catch (err: any) {
-    console.error(err);
-    message.error(err.response?.data?.message || "Error saving organization");
-  } finally {
-    setLoading(false);
-  }
-};
+      if (editingOrg) {
+        const res = await api.patch(`/organizations/${editingOrg.id}`, form);
+        orgId = editingOrg.id;
+        message.success("✅ Organization updated successfully!");
+      } else {
+        const res = await api.post(`/organizations`, form);
+        message.success("🎉 Organization added successfully!");
+        orgId = res.data?.id || res.data?.organization?.id;
+      }
 
+      // Show loader before redirect
+      message.loading("Redirecting to organization page...", 1);
+
+      // Wait 1 second to display loader, then navigate
+      setTimeout(() => {
+        router.push(`/admin/organizations/${orgId}`);
+      }, 1000);
+
+      // Reset form
+      setFormData({});
+      setShowForm(false);
+      setEditingOrg(null);
+    } catch (err: any) {
+      console.error(err);
+      message.error(err.response?.data?.message || "Error saving organization");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // 🔴 Delete Organization
   const handleDelete = async (id: number) => {
@@ -124,7 +133,9 @@ const handleSave = async () => {
       setOrganizations((prev) => prev.filter((o) => o.id !== id));
     } catch (err: any) {
       console.error(err);
-      message.error(err.response?.data?.message || "Error deleting organization");
+      message.error(
+        err.response?.data?.message || "Error deleting organization"
+      );
     } finally {
       setLoading(false);
     }
@@ -174,11 +185,11 @@ const handleSave = async () => {
           </div>
         ) : Array.isArray(organizations) && organizations.length > 0 ? (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-{organizations.map((org) => (
-  <div
-    key={org.id}
-    onClick={() => router.push(`/admin/organizations/${org.id}`)}
-    className="
+            {organizations.map((org) => (
+              <div
+                key={org.id}
+                onClick={() => router.push(`/admin/organizations/${org.id}`)}
+                className="
       relative
       bg-[#2A155A]
       rounded-2xl
@@ -189,81 +200,76 @@ const handleSave = async () => {
       shadow-md hover:shadow-lg
       min-h-[360px]   /* 🔥 CARD HEIGHT INCREASED */
     "
-  >
-
-    {/* Edit/Delete buttons */}
-    <div className="absolute top-5 right-5 flex gap-3 z-20">
-      <EditOutlined
-        className="
+              >
+                {/* Edit/Delete buttons */}
+                <div className="absolute top-5 right-5 flex gap-3 z-20">
+                  <EditOutlined
+                    className="
           text-white bg-black/40 
           p-2 rounded-full 
           hover:bg-black/60 
           transition text-base
         "
-        onClick={(e) => {
-          e.stopPropagation();
-          handleEdit(org);
-        }}
-      />
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleEdit(org);
+                    }}
+                  />
 
-      <Popconfirm
-        title="Delete this organization?"
-        okText="Yes"
-        cancelText="No"
-        onConfirm={(e) => {
-          e?.stopPropagation();
-          handleDelete(org.id);
-        }}
-      >
-        <DeleteOutlined
-          className="
+                  <Popconfirm
+                    title="Delete this organization?"
+                    okText="Yes"
+                    cancelText="No"
+                    onConfirm={(e) => {
+                      e?.stopPropagation();
+                      handleDelete(org.id);
+                    }}
+                  >
+                    <DeleteOutlined
+                      className="
             text-white bg-black/40 
             p-2 rounded-full 
             hover:bg-black/60 
             transition text-base
           "
-          onClick={(e) => e.stopPropagation()}
-        />
-      </Popconfirm>
-    </div>
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  </Popconfirm>
+                </div>
 
-    {/* FULL IMAGE WITH NO WHITE BACKGROUND */}
-    <div
-      className="
+                {/* FULL IMAGE WITH NO WHITE BACKGROUND */}
+                <div
+                  className="
         h-[320px]              /* 🔥 larger height */
         rounded-xl
         overflow-hidden        /* 🔥 image stays inside */
       "
-    >
-      {org.logo ? (
-        <img
-          src={org.logo}
-          alt={org.name}
-          className="
+                >
+                  {org.logo ? (
+                    <img
+                      src={org.logo}
+                      alt={org.name}
+                      className="
             h-full w-full 
             object-cover       /* 🔥 FULL IMAGE FILL */
             rounded-xl
           "
-        />
-      ) : (
-        <div className="h-full w-full flex items-center justify-center bg-gray-100 rounded-xl">
-          <span className="text-5xl font-bold text-gray-400">
-            {org.name?.charAt(0).toUpperCase()}
-          </span>
-        </div>
-      )}
-    </div>
+                    />
+                  ) : (
+                    <div className="h-full w-full flex items-center justify-center bg-gray-100 rounded-xl">
+                      <span className="text-5xl font-bold text-gray-400">
+                        {org.name?.charAt(0).toUpperCase()}
+                      </span>
+                    </div>
+                  )}
+                </div>
 
-    {/* Name */}
-    <p className="text-center text-white font-semibold py-4 text-base tracking-wide">
-      {org.name}
-    </p>
-  </div>
-))}
-
-
-
-
+                {/* Name */}
+                <p className="text-center text-white font-semibold py-4 text-base tracking-wide">
+                  {org.name}
+                </p>
+              </div>
+            ))}
           </div>
         ) : (
           <p className="text-gray-500 mt-6">No organizations found.</p>
@@ -271,7 +277,10 @@ const handleSave = async () => {
 
         {/* Inline Form */}
         {showForm && (
-          <div className="bg-white shadow-md rounded-xl p-6 mt-10 border border-gray-100 transition-all duration-300">
+          <div
+            ref={formRef}
+            className="bg-white shadow-md rounded-xl p-6 mt-10 border border-gray-100 transition-all duration-300"
+          >
             <h2 className="text-lg font-semibold mb-4 text-[#232323]">
               {editingOrg ? "Edit Organization" : "Add New Organization"}
             </h2>

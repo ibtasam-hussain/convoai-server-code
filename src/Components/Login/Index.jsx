@@ -56,7 +56,7 @@ const handleLogin = async () => {
 
         console.log('res.data in /login: ', res?.token, res?.user);
 
-        res?.user?.role === 'super-admin' ? router.push('/agents') : router.push('/agents-admin');
+        res?.user?.role === 'super-admin' ? router.push('/admin/dashboard') : router.push('/admin/dashboard');
 
     } catch (error) {
         console.error("Error in /login: ", error?.response?.data || error?.message || error);

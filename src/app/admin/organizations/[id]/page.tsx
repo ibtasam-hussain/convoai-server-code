@@ -93,21 +93,21 @@ const [wizardKey, setWizardKey] = useState(0);
         />
       ),
     },
-    {
-      title: "Prompt Setup",
-      component: (
-        <Step2_Prompt
-          formData={formData}
-          setFormData={setFormData}
-          organizationName={formData.organizationName || org?.name}
-          agentName={formData.name}
-          agentGender={formData.gender || formData.agentGender}
-          agentRole={formData.type}
-          primaryLanguage={formData.primaryLanguage || org?.language}
-          additionalLanguages={formData.additionalLanguages}
-        />
-      ),
-    },
+{
+  title: "Prompt Setup",
+  component: (
+    <Step2_Prompt
+      formData={formData}
+      setFormData={setFormData}
+      agentName={formData.name}
+      agentRole={formData.role}
+      agentGender={formData.gender}
+      organizationName={org?.name}
+      primaryLanguage={formData.primaryLanguage}
+      additionalLanguages={formData.additionalLanguages || []}
+    />
+  ),
+},
     {
       title: "Knowledge Sources",
       component: (
@@ -118,10 +118,16 @@ const [wizardKey, setWizardKey] = useState(0);
         />
       ),
     },
-    {
-      title: "Add Users",
-      component: <Step4_Confirmation organizationId={orgId} />,
-    },
+   {
+  title: "Add Users",
+  component: (
+    <Step4_Confirmation
+      organizationId={orgId}
+      agentId={selectedAgent?.id} // 🔥 IMPORTANT
+    />
+  ),
+}
+
   ];
 
   // ✅ Finish handler (Create or Update)
@@ -141,25 +147,34 @@ ${formData.description || "No description provided."}`;
 
 
 
-      const payload = {
-        organizationId: orgId,
-        name: formData.name,
-        type: formData.type || "support",
-        voice: formData.voice || null,
-      gender : formData.gender || "Female",
-        primaryLanguage: formData.primaryLanguage || "English",
-        additionalLanguages: formData.additionalLanguages || [],
-        apiKey: formData.apiKey || null,
-        escalationContact: formData.escalationContact || null,
-        prompt: formData.prompt || null,
-        description: formData.description || null,
-        settings: formData.settings || {},
-      };
+const payload = {
+  organizationId: orgId,
+  name: formData.name,
+  type: formData.type || "support",
+  voice: formData.voice || null,
+  gender: formData.gender || "Female",
+  primaryLanguage: formData.primaryLanguage || "English",
+  additionalLanguages: formData.additionalLanguages || [],
+  apiKey: formData.apiKey || null,
+  escalationContact: formData.escalationContact || null,
+
+  // 🔥 ADD THESE TWO
+  promptTemplateId: formData.promptTemplateId,
+  promptVars: formData.promptVars,
+
+  prompt: formData.prompt || null,
+  description: formData.description || null,
+  settings: formData.settings || {},
+};
+console.log("FINAL PAYLOAD", payload);
+
 
       if (isEditMode && selectedAgent?.id) {
         await updateAgent(selectedAgent.id, payload);
         message.success("Agent updated successfully!");
       } else {
+          console.log("Creating new agent...", payload);
+        
         await createAgent(payload);
         message.success("Agent created successfully!");
       }
@@ -236,19 +251,18 @@ ${formData.description || "No description provided."}`;
   className="
     bg-[#2A155A]
     rounded-2xl
-    p-10
+    p-2
     shadow-md hover:shadow-lg
-    hover:scale-[1.01]
     transition-all
     cursor-pointer
-    flex items-center
-    h-[220px]
+    flex
+    h-[320px]              /* 🔥 CARD HEIGHT INCREASED */
   "
 >
   {/* LEFT IMAGE */}
   <div
     className="
-      w-[180px]
+      w-1/2
       h-full
       rounded-xl
       overflow-hidden
@@ -256,27 +270,58 @@ ${formData.description || "No description provided."}`;
     "
   >
     <img
-      src={org.logo || 'https://placehold.co/300x300?text=ORG'}
+      src={org.logo || "https://placehold.co/600x400?text=ORG"}
       alt={org.name}
-      className="w-full h-full object-cover"
+      className="w-full h-full  object-cover"
     />
   </div>
 
-  {/* RIGHT TEXT CLOSER TO CENTER */}
-  <div className="ml-auto mr-20">
-    <div className="flex flex-col justify-center text-white space-y-2">
-      <h2 className="text-3xl font-semibold">{org.name}</h2>
-      <p className="text-gray-300 text-lg">{org.email}</p>
-      <p className="text-gray-400 text-lg">
-        {org.region} • {org.language}
-      </p>
+  {/* RIGHT CONTENT */}
+  <div className="w-1/2 pl-10 flex flex-col justify-center">
+    <h2 className="text-3xl font-semibold text-white mb-1">
+      {org.name}
+    </h2>
 
-      {org.bio && (
-        <p className="text-gray-400 text-sm mt-2 line-clamp-3">{org.bio}</p>
-      )}
-    </div>
+    <p className="text-gray-300 text-lg">
+      {org.email}
+    </p>
+
+    <p className="text-gray-400 text-lg mb-3">
+      {org.region} • {org.language}
+    </p>
+
+    {/* BIO — LIMITED BUT TALLER */}
+    {org.bio && (
+      <div
+        className="
+          text-gray-300
+          text-sm
+          leading-relaxed
+          overflow-hidden
+          max-h-[110px]        /* 🔥 BIO HEIGHT INCREASED */
+          relative
+        "
+      >
+        {org.bio}
+
+        {/* FADE */}
+        <div
+          className="
+            absolute
+            bottom-0
+            left-0
+            w-full
+            h-8
+            bg-gradient-to-t
+            from-[#2A155A]
+            to-transparent
+          "
+        />
+      </div>
+    )}
   </div>
 </div>
+
 
 
 
@@ -365,11 +410,11 @@ ${formData.description || "No description provided."}`;
 
 <Button
   className="flex-1 bg-[#A855F7] border-none text-white"
-  // onClick={(e) => {
-  //   e.stopPropagation();
-  //   // Open in new window/tab
-  //   window.open(`/chat/${a.id}?agent=${a.name}`, '_blank');
-  // }}
+  onClick={(e) => {
+    e.stopPropagation();
+    // Open in new window/tab
+    window.open(`/chat/${a.id}?agent=${a.name}`, '_blank');
+  }}
 >
   Test Chat
 </Button>

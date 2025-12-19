@@ -17,14 +17,17 @@ type User = {
 export default function UserModal({
   mode,
   user,
+  agentId,
   onClose,
   onSuccess,
 }: {
   mode: "create" | "view";
   user?: User;
+  agentId: number;
   onClose: () => void;
   onSuccess: () => void;
-}) {
+})
+ {
   const isEdit = mode === "view";
 
   const [form, setForm] = useState<User>({
@@ -64,9 +67,11 @@ export default function UserModal({
   const organizationId = JSON.parse(localStorage.getItem("user") || "{}")?.organizationId;
 
 
-if(!isEdit) {
-      formData.append("organizationId", String(organizationId));
+if (!isEdit) {
+  formData.append("organizationId", String(organizationId));
+  formData.append("agentId", String(agentId)); // ✅ REQUIRED
 }
+
       // 🔐 Password
       if (form.password) {
         formData.append("password", form.password);

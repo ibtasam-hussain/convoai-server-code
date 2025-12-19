@@ -65,7 +65,13 @@ export default function AgentCard({
             Test Call
           </Button>
 
-          <Button className="flex-1 bg-[#A855F7] border-none text-white">
+          <Button 
+            onClick={(e) => {
+    e.stopPropagation();
+    // Open in new window/tab
+    window.open(`/chat/${agent.id}?agent=${agent.name}`, '_blank');
+  }}
+          className="flex-1 bg-[#A855F7] border-none text-white">
             Test Chat
           </Button>
         </div>

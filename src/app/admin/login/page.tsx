@@ -2,6 +2,8 @@
 import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { FiEyeOff, FiEye } from "react-icons/fi";
+import Image from 'next/image';
+import Logo from "../../../../public/assets/Admin/dashboard/logo.svg";
 
 type FieldErrors = Partial<Record<'email' | 'password', string>>
 
@@ -103,13 +105,29 @@ export default function LoginPage() {
   return (
     <div className="relative min-h-screen bg-white flex flex-col items-center overflow-hidden" onKeyDown={onKeyDown}>
       {/* Top logo (bigger) */}
-      <div className="pt-10">
-        <img
-          src="/assets/Admin/logo.svg"
-          alt="ConvoAI"
-          className="h-14 w-auto mb-12"
-        />
-      </div>
+<div className="pt-20 flex items-center gap-3">
+  <Image
+    src={Logo}
+    alt="logo-image"
+    width={60}
+    height={60}
+    className="brightness-0"
+    priority
+  />
+ <span
+                className="
+                  text-[2.4rem]
+                  font-semibold
+               
+                  tracking-tight
+                  text-black
+                "
+              >
+                Conver<span className="text-[#6B4EFF]">AI</span>x
+              </span>
+</div>
+
+
 
       {/* Card */}
       <div className="relative z-10 mx-auto mt-14 w-[90%] sm:w-[70%] md:w-[60%] lg:w-[45%] xl:w-[35%] 2xl:w-[30%]">

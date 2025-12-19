@@ -74,36 +74,34 @@ useEffect(() => {
     try {
       const token = localStorage.getItem("token");
       if (!token) return;
+const res = await axios.get<CompanyProfile>(
+  `${apiUrl}/organizations/myorganization`,
+  {
+    headers: { Authorization: `Bearer ${token}` },
+    signal: controller.signal,
+  }
+);
+console.log(res.data);
+const c = res.data;
 
-      const res = await axios.get<{ company: CompanyProfile }>(`${apiUrl}/organizations/myorganization`, {
-        headers: { Authorization: `Bearer ${token}` },
-        signal: controller.signal,
-      });
+if (!c || !c.name || !c.email || !c.region || !c.language) {
+  throw new Error("Company data is missing required fields.");
+}
 
-      console.log("Fetched UserMe status:", res);
-      console.log("Fetched UserMe payload:", res.data);
+const comp: CompanyProfile = {
+  id: c.id,
+  name: c.name ?? "",
+  email: c.email ?? "",
+  region: c.region ?? "",
+  language: c.language ?? "",
+  logo: c.logo ?? null,
+  bio: c.bio ?? "",
+};
 
-      // Now that we're correctly typing `res.data` to include `company`
-      const c = res.data;
+setCompany(comp);
+setForm({ ...comp, region: displayRegion(comp.region) });
+setLogoPreview(comp.logo ?? null);
 
-      if (!c || !c.id || !c.name || !c.email || !c.region || !c.language) {
-        throw new Error("Company data is missing required fields.");
-      }
-
-      const comp: CompanyProfile = {
-        id: c.id ?? undefined,
-        name: c.name ?? "",
-        email: c.email ?? "",
-        region: c.region ?? "",
-        language: c.language ?? "",
-        logo: c.logo ?? null,
-        bio: c.bio ?? "",
-      };
-
-      // Set the company and form state
-      setCompany(comp);
-      setForm({ ...comp, region: displayRegion(comp.region) }); // Pretty region
-      setLogoPreview(comp.logo ?? null); // Set logo preview
     } catch (err: any) {
       if (!axios.isCancel(err)) {
         console.error(err);
