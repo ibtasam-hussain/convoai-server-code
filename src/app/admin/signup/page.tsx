@@ -80,7 +80,7 @@ export default function SignUpPage() {
     <div className="relative min-h-screen bg-white flex flex-col items-center">
       {/* Top logo (bigger) */}
       <div className="pt-10">
-        <img src="/assets/Admin/logo.svg" alt="ConvoAI" className="h-14 w-auto mb-12" />
+        <img src="/assets/Admin/logo.png" alt="ConvoAI" className="h-14 w-auto mb-12" />
       </div>
 
       {/* Card */}

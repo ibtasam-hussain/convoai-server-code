@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Logo from "../../../public/assets/Admin/dashboard/logo.svg";
+import Logo from "../../../public/assets/Admin/dashboard/logow.png";
 import Image from "next/image";
 
 const Header = () => {
@@ -9,7 +9,7 @@ const Header = () => {
       {/* Logo → admin/login */}
       <div className="left">
         <Link href="/admin/login">
-          <div className="logo w-[4.5rem] sm:w-[5.375rem] cursor-pointer">
+          <div className="logo w-[12.5rem] sm:w-[14.375rem] cursor-pointer">
             <Image src={Logo} className="w-full" alt="logo-image" />
           </div>
         </Link>

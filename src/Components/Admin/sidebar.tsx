@@ -17,7 +17,7 @@ import {
   Grid2x2,
 } from "lucide-react";
 import Image from "next/image";
-import Logo from "../../../public/assets/Admin/dashboard/logo.svg";
+import Logo from "../../../public/assets/Admin/dashboard/logow.png";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
@@ -136,10 +136,7 @@ useEffect(() => {
       <div className="w-full h-full overflow-y-auto flex flex-col">
         {/* Logo */}
         <div className="p-8 flex items-center gap-5">
-          <Image src={Logo} alt="logo" width={40} height={40} />
-          {!isSidebarCollapsed && (
-            <span className="text-2xl font-semibold">ConverAIx</span>
-          )}
+          <Image src={Logo} alt="logo" width={200} height={200} />
         </div>
 
         {/* Toggle Button for Collapsing Sidebar */}

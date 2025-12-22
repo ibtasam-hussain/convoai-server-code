@@ -14,11 +14,19 @@ export default function AgentCard({
   agent,
   onClick,
   onToggle,
-}: {
+}: 
+
+
+
+{
   agent: Agent;
   onClick: () => void;
   onToggle: () => Promise<void>;
-}) {
+})
+
+
+{
+    console.log("AgentCard rendered:", agent);
   return (
     <div
       className="
@@ -57,8 +65,7 @@ export default function AgentCard({
               ];
               const encoded = encodeURIComponent(JSON.stringify(lang));
               window.open(
-                `/start?agent=${agent.name}&agentId=${agent.id}&image=${agent.avatar}&languages=${encoded}`,
-                "_blank"
+                `/start?agent=${agent.name}&agentId=${agent.id}&image=${agent.avatar}&languages=${encoded}`
               );
             }}
           >
@@ -69,7 +76,7 @@ export default function AgentCard({
             onClick={(e) => {
     e.stopPropagation();
     // Open in new window/tab
-    window.open(`/chat/${agent.id}?agent=${agent.name}`, '_blank');
+    window.open(`/chat/${agent.id}?agent=${agent.name}?agentId=${agent.id}&image=${agent.avatar}`, '_blank');
   }}
           className="flex-1 bg-[#A855F7] border-none text-white">
             Test Chat

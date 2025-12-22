@@ -3,7 +3,7 @@ import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { FiEyeOff, FiEye } from "react-icons/fi";
 import Image from 'next/image';
-import Logo from "../../../../public/assets/Admin/dashboard/logo.svg";
+import Logo from "../../../../public/assets/Admin/dashboard/logo.png";
 
 type FieldErrors = Partial<Record<'email' | 'password', string>>
 
@@ -109,22 +109,10 @@ export default function LoginPage() {
   <Image
     src={Logo}
     alt="logo-image"
-    width={60}
-    height={60}
-    className="brightness-0"
+    width={300}
+    height={200}
     priority
   />
- <span
-                className="
-                  text-[2.4rem]
-                  font-semibold
-               
-                  tracking-tight
-                  text-black
-                "
-              >
-                Conver<span className="text-[#6B4EFF]">AI</span>x
-              </span>
 </div>
 
 

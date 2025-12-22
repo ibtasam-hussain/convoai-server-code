@@ -205,7 +205,7 @@ const Chat = ({ id }) => {
 
   return (
     <div>
-      <div className="w-[90%] xs:w-[80%] lg:w-[52.5%] mx-auto text-[.95rem] xs:text-[1rem]  mb-[1.5rem] md:text-[1.0625rem] text-center leading-relaxed">
+      <div className="w-[90%] xs:w-[80%] lg:w-[52.5%] mx-auto text-[.95rem] xs:text-[1rem] -mt-16 mb-[1.5rem] md:text-[1.0625rem] text-center leading-relaxed">
         Applying LLM-driven sentiment analysis and trend forecasting, we help
         businesses identify customer needs, guiding product development and
         fostering innovation to stay competitive.

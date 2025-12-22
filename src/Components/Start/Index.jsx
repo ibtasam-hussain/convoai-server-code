@@ -163,7 +163,7 @@ const StartPage = ({ searchParams }) => {
 
   return (
     // <div className="start-page min-h-[75vh] flex flex-col gap-[6.75rem] items-center">
-    <div className="start-page min-h-[82vh] flex flex-col gap-[3rem] xs:gap-[4.5rem] items-center justify-between">
+    <div className="start-page min-h-[82vh] -mt-20 flex flex-col gap-[3rem] xs:gap-[4.5rem] items-center justify-between">
       <div className="w-[90%] xs:w-[80%] lg:w-[52.5%] mx-auto text-[.95rem] xs:text-[1rem] md:text-[1.0625rem] text-center leading-relaxed">
         Applying LLM-driven sentiment analysis and trend forecasting, we help
         businesses identify customer needs, guiding product development and
@@ -197,14 +197,6 @@ const StartPage = ({ searchParams }) => {
                   "linear-gradient(90deg, rgba(96, 92, 241, 0.10) 0%, rgba(160, 57, 252, 0.10) 100%)",
               }}
             >
-              <div className="image">
-                <img
-                  src={item?.image || "/assets/Agents/urdu.png"}
-                  loading="lazy"
-                  className="w-[2.625rem]"
-                  alt=""
-                />
-              </div>
               <div className="text">{item?.name || "Urdu"}</div>
               <div className="icon w-[1.375rem] h-[1.375rem] absolute right-[-.4rem] top-[-.4rem] flex items-center justify-center bg-[#108E2B] rounded-[50%]">
                 <img src="/assets/Start/tick-icon.svg" alt="" />
