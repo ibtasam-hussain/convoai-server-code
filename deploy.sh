@@ -5,7 +5,7 @@
 # === SSH CONFIG ===
 SSH_USER="root"
 SSH_HOST="147.79.75.202"
-REMOTE_DIR="/var/www/convoai/FE"
+REMOTE_DIR="/var/www/convoai/fe"
 
 echo "🧹 Cleaning up local node_modules and lock file..."
 rm -rf node_modules
@@ -24,8 +24,3 @@ npm install
 echo "🏗️ Building Next.js app..."
 npm run build
 
-echo "🔁 Restarting PM2 process ID 8 (convoai-frontend)..."
-pm2 restart convoai-fe
-
-echo "✅ Frontend deployed successfully!"
-read -p "Press Enter to exit..."

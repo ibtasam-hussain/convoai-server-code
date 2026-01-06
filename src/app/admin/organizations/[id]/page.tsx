@@ -413,7 +413,7 @@ console.log("FINAL PAYLOAD", payload);
   onClick={(e) => {
     e.stopPropagation();
     // Open in new window/tab
-    window.open(`/chat/${a.id}?agent=${a.name}`, '_blank');
+    window.open(`/chat/${a.id}?agent=${a.name}&image=${a.avatar}&languages=${a.primaryLanguage}`, '_blank');
   }}
 >
   Test Chat

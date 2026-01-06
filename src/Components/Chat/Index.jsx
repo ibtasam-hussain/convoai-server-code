@@ -9,9 +9,8 @@ import "@ant-design/v5-patch-for-react-19";
 import secureLocalStorage from "react-secure-storage";
 import { useRouter, useSearchParams } from "next/navigation";
 import { BsSend } from "react-icons/bs";
-
-import { FaMicrophone } from "react-icons/fa";
-import { FiImage } from "react-icons/fi";
+import { IoMicOutline,IoAttachSharp  } from "react-icons/io5";
+import { FiImage ,FiSend  } from "react-icons/fi";
 
 const Chat = ({ id }) => {
   const router = useRouter();
@@ -25,6 +24,9 @@ const Chat = ({ id }) => {
   const [sessionId, setSessionId] = useState("");
   const searchParams = useSearchParams();
   const agentName = searchParams.get("agent");
+  const agentImage = searchParams.get("image");
+  const agentId = searchParams.get("agentId");
+  const agentLanguages = searchParams.get("languages");
 
   const chatContainerRef = useRef(null);
 
@@ -226,120 +228,101 @@ const Chat = ({ id }) => {
   "
 >
 
-        <div className="header bg-[#4A0082] py-[1rem] 2md:py-[1.175rem] px-[2.8rem]">
-          <div className="text-[1.3rem] xl:text-[1.5625rem] font-bold">
-            {(agentName || "Faisal Bank")?.toUpperCase()}
-          </div>
-        </div>
-        <div className="body bg-white px-[.7rem] 3xs:px-[1rem] py-[1rem] sm:px-[2rem] sm:py-[1.5rem] 2md:px-[3.375rem] 2md:py-[2.5rem]">
+<div className="bg-[#A855F7] px-5 py-4 flex items-center justify-between">
+  <div>
+    <h3 className="text-white font-semibold text-[17px] leading-tight">
+      {agentName || "K9 Coach AI"}
+    </h3>
+    <p className="text-white/90 text-[12px] mt-[4px]">
+      Your personal pet expert
+    </p>
+  </div>
+
+  <div className="flex items-center gap-4">
+    <h3 className="text-white text-[15px] font-medium cursor-pointer">
+    {agentLanguages || "English"}
+    </h3>
+  </div>
+</div>
+
+
+       <div className="body     bg-[#F8F8F8] 
+  px-[0.5rem] py-[0.45rem]
+  xs:px-[0.6rem] xs:py-[0.55rem]
+  sm:px-[0.75rem] sm:py-[0.75rem]
+  2md:px-[1.1rem] 2md:py-[1.1rem]
+">
+
 <div
   ref={chatContainerRef}
   className="
-    chat
-    h-[52vh]          /* 🔥 height reduced */
-    flex flex-col
-    gap-[1.5rem]
-    px-[.35rem]
-    py-[1.1rem]
-    3xs:px-[.5rem]
-    3xs:py-[1.4rem]
-    xs:py-[1.7rem]
-    2md:px-[1.25rem]
-    2md:py-[2.5rem]
+    bg-[#F8F8F8]
+    min-h-[470px]
+    max-h-[520px]
+    px-4
+    py-3
     overflow-y-auto
-    rounded-[1rem]
+    flex
+    flex-col
+    justify-end
+    gap-3
   "
 >
 
-            {/* <UserMessage />
-              <UserMessage type='bot' /> */}
-            {messages.map((msg, i) => (
-              <UserMessage
-                key={`msg-${i}-${msg.type}`}
-                type={msg.type}
-                message={msg.message}
-              />
-            ))}
-          </div>
-          <div className="bottom w-full flex flex-col items-center 3xs:items-stretch 3xs:flex-row gap-[.75rem] 3xs:gap-[.3rem] 2md:gap-[.5rem] mt-[1.3rem] xs:mt-[1.6rem] 3xl:mt-[2.1rem]">
-            <input
-              type="text"
-              placeholder="Write message"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  sendMessage();
-                }
-              }}
-              disabled={loading}
-              className="w-full px-[1.375rem] py-[.5rem] 2md:py-[.6rem] bg-[#F7F7F7] text-[.9rem] 2md:text-[1rem] placeholder:text-[#595B62] text-[#595B62] rounded-[.5rem]"
-            />
-            <div className="flex gap-[.3rem] 2md:gap-[.5rem]">
-              {/* IMAGE UPLOAD */}
-              <div
-                onClick={() => fileInputRef.current?.click()}
-                className="
-      icon
-      w-[2.4rem] sm:w-[2.6rem] 2md:w-[3.125rem]
-      aspect-square md:aspect-auto
-      flex items-center justify-center
-      bg-[#4A0082]
-      rounded-[.5rem]
-      cursor-pointer
-      hover:opacity-90
-    "
-              >
-                <FiImage className="text-white text-[1rem] 2md:text-[1.375rem]" />
-              </div>
+  {messages.map((msg, i) => (
+    <UserMessage
+      key={i}
+      type={msg.type}
+      message={msg.message}
+    />
+  ))}
+</div>
 
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                hidden
-                onChange={handleImageSelect}
-              />
+<div className="bg-white border-t px-4 py-3 flex items-center gap-3">
+  {/* INPUT */}
+  <input
+    type="text"
+    placeholder="Type your message..."
+    value={input}
+    onChange={(e) => setInput(e.target.value)}
+    onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+    className="flex-1 px-5 py-3 text-[14px] bg-[#F1F1F1] rounded-full outline-none"
+  />
 
-              {/* VOICE */}
-              <div
-                className="
-      icon
-      w-[2.4rem] sm:w-[2.6rem] 2md:w-[3.125rem]
-      aspect-square md:aspect-auto
-      flex items-center justify-center
-      bg-[#4A0082]
-      rounded-[.5rem]
-      cursor-pointer
-      hover:opacity-90
-    "
-              >
-                <FaMicrophone className="text-white text-[1rem] 2md:text-[1.375rem]" />
-              </div>
+  {/* ACTION BUTTONS */}
+  <div className="flex items-center gap-4">
+    {/* Upload */}
+    <div className="flex flex-col items-center text-[11px] text-gray-500">
+      <button
+        onClick={() => fileInputRef.current.click()}
+        className="w-9 h-9 rounded-full bg-[#A855F7] flex items-center justify-center text-white mb-1"
+      >
+        <IoAttachSharp size={22} />
+      </button>
+    </div>
 
-              {/* SEND */}
-              <div
-                onClick={sendMessage}
-                className="
-      icon
-      w-[2.4rem] sm:w-[2.6rem] 2md:w-[3.125rem]
-      aspect-square md:aspect-auto
-      flex items-center justify-center
-      bg-[#4A0082]
-      rounded-[.5rem]
-      cursor-pointer
-      hover:opacity-90
-    "
-              >
-                {loading ? (
-                  <div className="loader-small"></div>
-                ) : (
-                  <BsSend className="text-white text-[1rem] 2md:text-[1.375rem]" />
-                )}
-              </div>
-            </div>
-          </div>
+    {/* Mic */}
+    <div className="flex flex-col items-center text-[11px] text-gray-500">
+      <button
+        className="w-9 h-9 rounded-full bg-[#A855F7] flex items-center justify-center text-white mb-1"
+      >
+        <IoMicOutline size={22} />
+      </button>
+    </div>
+
+    {/* Send */}
+    <div className="flex flex-col items-center text-[11px] text-gray-500">
+      <button
+        onClick={sendMessage}
+        className="w-9 h-9 rounded-full bg-[#A855F7] flex items-center justify-center text-white mb-1"
+      >
+        <FiSend size={20} />
+      </button>
+    </div>
+  </div>
+</div>
+
+
         </div>
       </div>
     </div>
@@ -347,72 +330,29 @@ const Chat = ({ id }) => {
 };
 
 const UserMessage = ({ type, message }) => {
+  const isBot = type === "bot";
+
   return (
-    <div className={`wrapper ${type !== "bot" ? "flex justify-end" : ""}`}>
+    <div className={`flex ${isBot ? "justify-start" : "justify-end"}`}>
       <div
-        className={`user-message w-full sm:w-[90%] 2md:w-[85%] xl:w-[70%] flex gap-[.3rem] xs:gap-[.5rem] 2md:gap-[.8rem] xl:gap-[1.375rem] ${
-          type !== "bot" ? "flex-row-reverse" : ""
-        }`}
+        className={`
+          max-w-[75%]
+          px-4
+          py-3
+          text-[14px]
+          leading-relaxed
+          ${
+            isBot
+              ? "bg-[#F3B34D] text-[#1E1E1E] rounded-[14px] rounded-bl-none"
+              : "bg-[#1F2937] text-white rounded-[14px] rounded-br-none"
+          }
+        `}
       >
-        <div
-          className={`logo w-[2.1rem] h-[2.1rem] xs:w-[2.5rem] xs:h-[2.5rem] 2md:w-[3.375rem] 2md:h-[3.375rem] flex items-center justify-center object-contain aspect-square ${
-            type === "bot" ? "bg-[#4A0082]" : "bg-[#D9D9D9]"
-          } rounded-[50%]`}
-        >
-          <img
-            src={
-              type === "bot" ? "/assets/Chat/bot.png" : "/assets/Chat/user.png"
-            }
-            className={`${
-              type === "bot"
-                ? "w-[1.7rem] h-[1.7rem] 2md:w-[2.4rem] 2md:h-[2.4rem]"
-                : "w-full h-full"
-            } object-contain rounded-[50%]`}
-            alt=""
-          />
-        </div>
-        <div
-          className={`message min-w-[40%] flex flex-col gap-[.5rem] px-[.9rem] py-[.8rem] xs:px-[1.2rem] 2md:py-[1.375rem] 2md:px-[1.875rem] 2md:pb-[.9rem] ${
-            type !== "bot" ? "bg-[#fff] text-[#202224]" : "bg-[#1E113B]"
-          } rounded-[.75rem] rounded-bl-none`}
-          style={{ boxShadow: "0px 4px 12.6px 0px rgba(0, 0, 0, 0.09)" }}
-        >
-          <div className="text-[.8rem] 2md:text-[.875rem] leading-normal xs:leading-relaxed">
-            {message}
-          </div>
-          <div className="bottom flex items-center justify-end gap-[.7rem]">
-            {type === "bot" && (
-              <div className="icons flex items-center gap-[.4rem] py-[.25rem] px-[.3rem] bg-[#4A0082] rounded-[.5rem]">
-                <img
-                  src="/assets/Chat/copy.svg"
-                  className="w-[.95rem] object-contain"
-                  alt=""
-                />
-                <img
-                  src="/assets/Chat/like.svg"
-                  className="w-[.95rem] object-contain"
-                  alt=""
-                />
-                <img
-                  src="/assets/Chat/dislike.svg"
-                  className="w-[.95rem] object-contain"
-                  alt=""
-                />
-              </div>
-            )}
-            <div className="info flex items-center gap-[.45rem]">
-              <div className="text-[.7rem] text-[#757575] leading-none">
-                6.30 pm
-              </div>
-              <div className="icon">
-                <img src="/assets/Chat/more.svg" alt="" />
-              </div>
-            </div>
-          </div>
-        </div>
+        {message}
       </div>
     </div>
   );
 };
+
 
 export default Chat;
